@@ -1,0 +1,245 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantastic Massage Spa - Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        .parallax-hero {
+            background: url('https://via.placeholder.com/1920x1080?text=Gallery+Background') center/contain no-repeat fixed;
+            height: 50vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .parallax-overlay {
+            background: linear-gradient(to bottom, rgba(215, 210, 203, 0.7), rgba(232, 228, 221, 0.7));
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .btn-hover:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
+            background: #D4B584;
+        }
+        .header {
+            background: #1A2526;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        .header.scrolled {
+            background: #1A2526;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: #D7D2CB;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1A2526;
+            padding: 1rem;
+        }
+        .mobile-menu.active {
+            display: block;
+        }
+        @media (min-width: 768px) {
+            .mobile-menu {
+                display: none !important;
+            }
+            nav {
+                display: flex !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-[#1A2526]">
+    <header class="header fixed w-full top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="text-2xl font-serif text-[#C9A66B]">Fantastic Massage Spa</div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="index.html" class="text-white hover:text-[#C9A66B]">Home</a>
+                <div class="relative group">
+                    <a href="services.html" class="text-white hover:text-[#C9A66B]">Experiences</a>
+                    <div class="absolute hidden group-hover:block bg-[#D7D2CB] shadow-lg rounded mt-2">
+                        <a href="services.html#thermal-baths" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Thermal Baths</a>
+                        <a href="services.html#massages" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Massages</a>
+                        <a href="services.html#facials" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Facials</a>
+                        <a href="services.html#aromatherapy" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Aromatherapy</a>
+                        <a href="services.html#rituals" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Rituals</a>
+                    </div>
+                </div>
+                <a href="gallery.html" class="text-white hover:text-[#C9A66B]">Gallery</a>
+                <a href="booking.html" class="text-white hover:text-[#C9A66B]">Book Now</a>
+                <a href="blog.html" class="text-white hover:text-[#C9A66B]">Wellness Journal</a>
+                <a href="contact.html" class="text-white hover:text-[#C9A66B]">Contact</a>
+            </nav>
+            <button class="md:hidden text-white focus:outline-none menu-toggle">☰</button>
+            <div class="mobile-menu hidden md:hidden">
+                <a href="index.html" class="block text-white hover:text-[#C9A66B] py-2">Home</a>
+                <div class="relative group">
+                    <a href="services.html" class="block text-white hover:text-[#C9A66B] py-2">Experiences</a>
+                    <div class="absolute hidden group-hover:block bg-[#D7D2CB] shadow-lg rounded mt-2 w-full">
+                        <a href="services.html#thermal-baths" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Thermal Baths</a>
+                        <a href="services.html#massages" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Massages</a>
+                        <a href="services.html#facials" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Facials</a>
+                        <a href="services.html#aromatherapy" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Aromatherapy</a>
+                        <a href="services.html#rituals" class="block px-4 py-2 text-[#1A2526] hover:bg-[#E8E4DD]">Rituals</a>
+                    </div>
+                </div>
+                <a href="gallery.html" class="block text-white hover:text-[#C9A66B] py-2">Gallery</a>
+                <a href="booking.html" class="block text-white hover:text-[#C9A66B] py-2">Book Now</a>
+                <a href="blog.html" class="block text-white hover:text-[#C9A66B] py-2">Wellness Journal</a>
+                <a href="contact.html" class="block text-white hover:text-[#C9A66B] py-2">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="parallax-hero">
+        <div class="parallax-overlay text-center text-white">
+            <div class="fade-in">
+                <h1 class="text-5xl font-serif mb-4">Gallery</h1>
+                <p class="text-xl mb-6">Explore the serene beauty of our spa</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-[#E8E4DD]">
+        <div class="container mx-auto px-4 fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <img src="https://via.placeholder.com/400x300?text=Gallery+Image+1" alt="Gallery Image 1" class="rounded shadow-lg">
+                <img src="https://via.placeholder.com/400x300?text=Gallery+Image+2" alt="Gallery Image 2" class="rounded shadow-lg">
+                <img src="https://via.placeholder.com/400x300?text=Gallery+Image+3" alt="Gallery Image 3" class="rounded shadow-lg">
+            </div>
+            <div class="text-center mt-12">
+                <a href="#" class="inline-block bg-[#C9A66B] text-[#1A2526] px-6 py-3 rounded btn-hover">View More</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#1A2526] text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-serif mb-4">Fantastic Massage Spa</h3>
+                    <p>Your sanctuary for wellness and relaxation in Uganda</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-serif mb-4">Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html" class="hover:text-[#C9A66B]">Home</a></li>
+                        <li><a href="services.html" class="hover:text-[#C9A66B]">Services</a></li>
+                        <li><a href="booking.html" class="hover:text-[#C9A66B]">Book Now</a></li>
+                        <li><a href="contact.html" class="hover:text-[#C9A66B]">Contact</a></li>
+                        <li><a href="#" class="hover:text-[#C9A66B]">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-serif mb-4">Hours</h3>
+                    <p>Monday - Friday: 9am - 8pm</p>
+                    <p>Saturday: 10am - 6pm</p>
+                    <p>Sunday: 10am - 4pm</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-serif mb-4">Contact Us</h3>
+                    <p>Plot 14, Kampala Road, Kampala</p>
+                    <p>+256 787729536</p>
+                    <p>info@fantasticmassagespa.co.ug</p>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <div class="flex justify-center space-x-4 mb-4">
+                    <a href="#"><img src="https://via.placeholder.com/24?text=FB" alt="Facebook"></a>
+                    <a href="#"><img src="https://via.placeholder.com/24?text=IG" alt="Instagram"></a>
+                    <a href="#"><img src="https://via.placeholder.com/24?text=TW" alt="Twitter"></a>
+                    <a href="#"><img src="https://via.placeholder.com/24?text=YT" alt="YouTube"></a>
+                </div>
+                <p>© 2025 Fantastic Massage Spa. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="fixed bottom-4 right-4 bg-[#C9A66B] text-[#1A2526] p-4 rounded-full shadow-lg cursor-pointer">
+        <p>How can we help you?</p>
+    </div>
+
+    <script>
+        const header = document.querySelector('.header');
+        window.addEventListener('scroll', () => {
+            header.classList.toggle('scrolled', window.scrollY > 0);
+        });
+
+        gsap.utils.toArray('.fade-in').forEach(elem => {
+            gsap.fromTo(elem, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', scrollTrigger: {
+                trigger: elem,
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+            }});
+        });
+
+        const menuToggle = document.querySelector('.menu-toggle');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+        });
+    </script>
